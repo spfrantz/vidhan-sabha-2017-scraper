@@ -1,0 +1,1 @@
+Note: one booth in Uttarakhand AC 54 (Lohaghat) will be re-polled on Mar. 15 due to problems with the electronic voting machines. Preliminary results from the constituency are included in the .csv. Final results will be posted on/after Mar. 15.
