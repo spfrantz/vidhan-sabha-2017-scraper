@@ -1,13 +1,14 @@
 # Scrapes Goa 2017 Vidhan Sabha results
-# Modified 11-Mar-2017
 
 import requests, bs4, time, re
 import pandas as pd
 
-results=[[0, 0, 0, 0, 0, 0, 0, 0]] # Create results table. This placeholder row will be deleted later
+results=[]
 
 starturl = 'http://www.eciresults.nic.in/ConstituencywiseS05'
-headers = {'user-agent': 'Intel_Mac_OSX 10_12_3; your_name/location/e-mail'} # It's nice to say who you are
+
+# Your info goes here:
+headers = {'user-agent': 'Intel_Mac_OSX 10_12_3; your_name/location/e-mail'}
 
 #Get constituency list and numbers
 res = requests.get('http://www.eciresults.nic.in/ConstituencywiseS0510.htm?ac=10', headers=headers)
@@ -27,14 +28,14 @@ def extract_constituency(consid):
     try:
         res = requests.get(starturl + str(n) +'.htm?ac=' + str(n), headers=headers)
         print(res.status_code)
-        
+
         if res.status_code == 200:
             print('OK')
         else:
             print('Error')
     except:
         print('Results from constituency ' + str(n) + ' not found')
-    
+
      #Extract results table
     try:
         soup=bs4.BeautifulSoup(res.text, "html.parser")
@@ -55,25 +56,17 @@ def extract_constituency(consid):
         print('Results from ' + str(const_name) + ' added to table.')
     except:
         print('Results from constituency ' + str(n) + ' not found')
-    time.sleep(2)
+    time.sleep(1)
 
-# Loop through each constituency and extract results        
+# Loop through each constituency and extract results
 for n in cons_numbers:
     extract_constituency(n)
 
 # Assemble results into pandas dataframe
-results.remove([0, 0, 0, 0, 0, 0, 0, 0]) #remove placeholder row
 cresults=pd.DataFrame(results,columns=['candidate', 'party', 'votes', 'state', 'state_num', 'const_num', 'const_name', 'status'])
 
 # Write results to disk
 print('Results ready to save. Save as: ')
 filename = input()
-cresults.to_csv(str(filename) + '.csv', na_rep='.') 
+cresults.to_csv(str(filename) + '.csv', na_rep='.')
 print('Results written to disk')
-
-
-
-
-
-
-    

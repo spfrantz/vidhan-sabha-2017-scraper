@@ -1,13 +1,10 @@
 # Scrapes Assam 2016 Vidhan Sabha results from the Wayback Machine
-# Modified 11-Mar-2017
 
 import requests, bs4, time, re
 import pandas as pd
 
-results=[[0, 0, 0, 0, 0, 0, 0, 0]] # Create results table. This placeholder row will be deleted later
-
-starturl = 'https://web.archive.org/web/20160522160308/http://eciresults.nic.in/ConstituencywiseS03'
-headers = {'user-agent': 'Intel_Mac_OSX 10_12_3; your_name/location/e-mail'} # It's nice to say who you are
+# Your info goes here:
+headers = {'user-agent': 'Intel_Mac_OSX 10_12_3; your_name/location/e-mail'}
 
 #Get constituency list and numbers
 res = requests.get('https://web.archive.org/web/20160522160308/http://eciresults.nic.in/ConstituencywiseS0334.htm?ac=34', headers=headers)
@@ -22,20 +19,23 @@ cons_list = cons[0]['value']
 cons_numbers = [int(s) for s in re.findall(r'\b\d+\b', cons_list)]
 cons_numbers.sort()
 
+results=[]
+starturl = 'https://web.archive.org/web/20160522160308/http://eciresults.nic.in/ConstituencywiseS03'
+
 #Define scraping procedure
 def extract_constituency(consid):
     try:
         res = requests.get(starturl + str(n) +'.htm?ac=' + str(n), headers=headers)
         print(res.status_code)
-        
+
         if res.status_code == 200:
             print('OK')
         else:
             print('Error')
     except:
         print('Results from constituency ' + str(n) + ' not found')
-    
-     #Extract results table
+
+    #Extract results table
     try:
         soup=bs4.BeautifulSoup(res.text, "html.parser")
         resultTable = soup.find_all('table')[-3]
@@ -53,27 +53,21 @@ def extract_constituency(consid):
             row.append(elec_status)
             results.append(row)
         print('Results from ' + str(const_name) + ' added to table.')
+
     except:
         print('Results from constituency ' + str(n) + ' not found')
-    time.sleep(2)
 
-# Loop through each constituency and extract results        
+    time.sleep(1)
+
+# Loop through each constituency and extract results
 for n in cons_numbers:
     extract_constituency(n)
 
 # Assemble results into pandas dataframe
-results.remove([0, 0, 0, 0, 0, 0, 0, 0]) #remove placeholder row
 cresults=pd.DataFrame(results,columns=['candidate', 'party', 'votes', 'state', 'state_num', 'const_num', 'const_name', 'status'])
 
 # Write results to disk
 print('Results ready to save. Save as: ')
 filename = input()
-cresults.to_csv(str(filename) + '.csv', na_rep='.') 
+cresults.to_csv(str(filename) + '.csv', na_rep='.')
 print('Results written to disk')
-
-
-
-
-
-
-    
